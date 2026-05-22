@@ -1,0 +1,159 @@
+name: forgejo
+services:
+  forgejo:
+    container_name: forgejo
+    image: codeberg.org/forgejo/forgejo:15.0.2-rootless@sha256:cc2d74fb4c30385a8ee34de8c8f83344f7316cec70bd2cc7eb82b2802fa28e0b
+    restart: unless-stopped
+    networks:
+      - forgejo
+      - forgejo-db
+      - forgejo-cache
+    # TODO: uncomment after migration from Gitea
+    # ports:
+    # - "62222:62222"
+    environment:
+      - APP_NAME=${APP_NAME}
+      - FORGEJO__cache__ADAPTER=redis
+      - FORGEJO__cache__HOST=redis://forgejo-cache:6379/0?pool_size=100&idle_timeout=180s
+      - FORGEJO__database__DB_TYPE=postgres
+      - FORGEJO__database__HOST=forgejo-db:5432
+      - FORGEJO__database__NAME=forgejo
+      - FORGEJO__database__USER=${DB_USER}
+      - FORGEJO__database__PASSWD=${DB_PASSWORD}
+      - FORGEJO__mailer__ENABLED=true
+      - FORGEJO__mailer__PROTOCOL=smtps
+      - FORGEJO__mailer__SMTP_ADDR=${SMTP_HOST}
+      - FORGEJO__mailer__SMTP_PORT=${SMTP_PORT}
+      - FORGEJO__mailer__USER=${SMTP_USER}
+      - FORGEJO__mailer__PASSWD=${SMTP_PASSWORD}
+      - FORGEJO__mailer__FROM=${SMTP_FROM}
+      - FORGEJO__mailer__SUBJECT_PREFIX=[Forgejo]
+      - FORGEJO__repository__ENABLE_PUSH_CREATE_USER=true
+      - FORGEJO__repository__ENABLE_PUSH_CREATE_ORG=true
+      - FORGEJO__security__REVERSE_PROXY_TRUSTED_PROXIES=172.16.0.0/16 # Change this as needed if using different subnet for Docker Networks
+      - FORGEJO__server__DOMAIN=${DOMAIN}
+      - FORGEJO__server__ROOT_URL=${ROOT_URL}
+      - FORGEJO__server__START_SSH_SERVER=true
+      - FORGEJO__server__SSH_LISTEN_PORT=62222
+      - FORGEJO__server__SSH_PORT=62222
+      # - FORGEJO__service__DISABLE_REGISTRATION=true # TODO: uncomment after initial setup
+      - FORGEJO__service__ENABLE_NOTIFY_MAIL=true
+      - FORGEJO__service__ENABLE_BASIC_AUTHENTICATION=false
+      - FORGEJO__service__REQUIRE_CAPTCHA_FOR_LOGIN=true
+      - FORGEJO__service__DEFAULT_KEEP_EMAIL_PRIVATE=true
+      - FORGEJO__webhook__ALLOWED_HOST_LIST=${WEBHOOK_ALLOWED_HOST_LIST}
+      - FORGEJO__webhook__DELIVER_TIMEOUT=60
+      - USER_UID=${UID}
+      - USER_GID=${GID}
+    volumes:
+      - ${DOCKER_VOLUMES}/forgejo/data:/var/lib/gitea
+      - ${DOCKER_VOLUMES}/forgejo/config:/etc/gitea
+      - /etc/localtime:/etc/localtime:ro
+
+    depends_on:
+      - forgejo-db
+      - forgejo-cache
+
+    user: "${UID}:${GID}"
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+    logging:
+      driver: journald
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:3000/api/healthz || exit 1
+      interval: 1m
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+    deploy:
+      resources:
+        limits:
+          cpus: 0.75
+          memory: 512M
+          pids: 100
+
+  forgejo-db:
+    container_name: forgejo-db
+    image: postgres:18.4-alpine3.23@sha256:96d56f7f57c6aacd1fcb908bc83b345ec5f83231ee486dd66a1baadce274db88
+    restart: unless-stopped
+    networks:
+      - forgejo-db
+    shm_size: 256M
+    environment:
+      - POSTGRES_DB=forgejo
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - ${DOCKER_VOLUMES}/forgejo/database:/var/lib/postgresql
+      - /etc/localtime:/etc/localtime:ro
+
+    user: "${UID}:${GID}"
+    read_only: true
+    tmpfs:
+      - /var/run/postgresql
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+    logging:
+      driver: journald
+    healthcheck:
+      test: pg_isready -U ${DB_USER} -d forgejo || exit 1
+      interval: 1m
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+    deploy:
+      resources:
+        limits:
+          cpus: 0.5
+          memory: 512M
+          pids: 50
+
+  forgejo-cache:
+    container_name: forgejo-cache
+    image: redis:8.6.3-alpine3.23@sha256:d146f83b1e0f02fc27c26a50cee39338c736674c5959db84363e6ae3cd9e02d2
+    restart: unless-stopped
+    command: redis-server --save ""
+    networks:
+      - forgejo-cache
+
+    user: "${UID}:${GID}"
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+    logging:
+      driver: journald
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1m
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+    deploy:
+      resources:
+        limits:
+          cpus: 0.25
+          memory: 256M
+          pids: 30
+
+networks:
+  forgejo:
+    external: true
+  forgejo-db:
+    external: true
+  forgejo-cache:
+    external: true
