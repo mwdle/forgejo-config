@@ -47,7 +47,6 @@ services:
       - USER_GID=${GID}
     volumes:
       - ${DOCKER_VOLUMES}/forgejo/data:/var/lib/gitea
-      - ${DOCKER_VOLUMES}/forgejo/config:/etc/gitea
       - /etc/localtime:/etc/localtime:ro
 
     depends_on:
@@ -97,6 +96,7 @@ services:
     user: "${UID}:${GID}"
     read_only: true
     tmpfs:
+      - /tmp
       - /var/run/postgresql
     security_opt:
       - no-new-privileges:true
