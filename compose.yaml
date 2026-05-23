@@ -8,9 +8,8 @@ services:
       - forgejo
       - forgejo-db
       - forgejo-cache
-    # TODO: uncomment after migration from Gitea
-    # ports:
-    # - "62222:62222"
+    ports:
+      - "62222:62222"
     environment:
       - APP_NAME=${APP_NAME}
       - FORGEJO__cache__ADAPTER=redis
@@ -36,7 +35,7 @@ services:
       - FORGEJO__server__START_SSH_SERVER=true
       - FORGEJO__server__SSH_LISTEN_PORT=62222
       - FORGEJO__server__SSH_PORT=62222
-      # - FORGEJO__service__DISABLE_REGISTRATION=true # TODO: uncomment after initial setup
+      - FORGEJO__service__DISABLE_REGISTRATION=true
       - FORGEJO__service__ENABLE_NOTIFY_MAIL=true
       - FORGEJO__service__ENABLE_BASIC_AUTHENTICATION=false
       - FORGEJO__service__REQUIRE_CAPTCHA_FOR_LOGIN=true
