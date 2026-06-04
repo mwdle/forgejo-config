@@ -49,8 +49,10 @@ services:
       - /etc/localtime:/etc/localtime:ro
 
     depends_on:
-      - forgejo-db
-      - forgejo-cache
+      forgejo-db:
+        condition: service_healthy
+      forgejo-cache:
+        condition: service_healthy
 
     user: "${UID}:${GID}"
     read_only: true
