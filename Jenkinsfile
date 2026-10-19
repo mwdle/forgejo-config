@@ -1,0 +1,21 @@
+@Library("JenkinsPipelines") _ // See https://github.com/mwdle/JenkinsPipelines
+
+boolean disableIndexTriggers = env.BRANCH_NAME != 'main'
+
+quadletPipeline(
+    disableIndexTriggers: disableIndexTriggers,
+    podmanSecretMappings: [
+        [
+            type: 'usernamePassword',
+            credentialsId: 'forgejo-db',
+            podmanSecretPasswordName: 'forgejo_db_password',
+            podmanSecretUsernameName: 'forgejo_db_username'
+        ],
+        [
+            type: 'usernamePassword',
+            credentialsId: 'Email noreply',
+            podmanSecretPasswordName: 'lab_smtp_password',
+            podmanSecretUsernameName: 'lab_smtp_username'
+        ]
+    ]
+)
