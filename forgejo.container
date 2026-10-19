@@ -58,7 +58,7 @@ Volume=%h/containers/forgejo/data:/var/lib/gitea:U,Z
 
 ReadOnly=true
 ReadOnlyTmpfs=false
-Mount=type=tmpfs,destination=/tmp
+Tmpfs=/tmp
 
 User=1000
 Group=1000
