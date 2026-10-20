@@ -58,7 +58,7 @@ Volume=%h/containers/forgejo/data:/var/lib/gitea:U,Z
 
 ReadOnly=true
 ReadOnlyTmpfs=false
-Tmpfs=/tmp
+Tmpfs=/tmp:noexec,nosuid
 
 User=1000
 Group=1000
