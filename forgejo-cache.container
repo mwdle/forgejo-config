@@ -4,6 +4,8 @@ ContainerName=forgejo-cache
 
 Network=forgejo-cache.network
 
+Timezone=local
+
 ReadOnly=true
 ReadOnlyTmpfs=false
 

@@ -19,6 +19,8 @@ Secret=forgejo_db_username,target=db_username,uid=1000,gid=1000,mode=0400
 Secret=lab_smtp_password,target=smtp_password,uid=1000,gid=1000,mode=0400
 Secret=lab_smtp_username,target=smtp_username,uid=1000,gid=1000,mode=0400
 
+Timezone=local
+
 Environment=APP_NAME="mwdle Hosting"
 Environment=FORGEJO__cache__ADAPTER=redis
 Environment=FORGEJO__cache__HOST=redis://forgejo-cache:6379/0?pool_size=100&idle_timeout=180s
@@ -50,7 +52,6 @@ Environment=FORGEJO__service__ENABLE_NOTIFY_MAIL=true
 Environment=FORGEJO__service__REQUIRE_CAPTCHA_FOR_LOGIN=true
 Environment=FORGEJO__webhook__ALLOWED_HOST_LIST=jenkins.mwdle.com
 Environment=FORGEJO__webhook__DELIVER_TIMEOUT=60
-Environment=TZ=America/Denver
 Environment=USER_UID=1000
 Environment=USER_GID=1000
 

@@ -7,10 +7,11 @@ Network=forgejo-db.network
 Secret=forgejo_db_password,target=db_password,uid=1000,gid=1000,mode=0400
 Secret=forgejo_db_username,target=db_username,uid=1000,gid=1000,mode=0400
 
+Timezone=local
+
 Environment=POSTGRES_DB=forgejo
 Environment=POSTGRES_PASSWORD_FILE=/run/secrets/db_password
 Environment=POSTGRES_USER_FILE=/run/secrets/db_username
-Environment=TZ=America/Denver
 
 Volume=%h/containers/forgejo/database:/var/lib/postgresql:U,Z
 
